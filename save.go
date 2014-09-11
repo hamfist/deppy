@@ -340,7 +340,7 @@ This directory tree is generated automatically by goderp.
 
 Please do not edit.
 
-See https://github.com/tools/goderp for more information.
+See https://github.com/meatballhat/goderp for more information.
 `
 	copyWarning = `
 deprecated flag -copy=true

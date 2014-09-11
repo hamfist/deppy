@@ -72,7 +72,7 @@ func TestSave(t *testing.T) {
 	}{
 		{
 			// dependency on parent directory in same repo
-			// see bug https://github.com/tools/goderp/issues/70
+			// see bug https://github.com/tools/godep/issues/70
 			cwd:  "P",
 			args: []string{"./..."},
 			start: []*node{
