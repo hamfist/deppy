@@ -15,7 +15,7 @@ import (
 
 var cmdSave = &Command{
 	Usage: "save [-r] [-copy=false] [packages]",
-	Short: "list and copy dependencies into Godeps",
+	Short: "list and copy dependencies into Goderps",
 	Long: `
 Save writes a list of the dependencies of the named packages along
 with the exact source control revision of each dependency, and copies
@@ -23,10 +23,10 @@ their source code into a subdirectory.
 
 The dependency list is a JSON document with the following structure:
 
-	type Godeps struct {
+	type Goderps struct {
 		ImportPath string
 		GoVersion  string   // Abridged output of 'go version'.
-		Packages   []string // Arguments to godep save, if any.
+		Packages   []string // Arguments to goderp save, if any.
 		Deps       []struct {
 			ImportPath string
 			Comment    string // Tag or description of commit.
@@ -35,17 +35,17 @@ The dependency list is a JSON document with the following structure:
 	}
 
 Any dependencies already present in the list will be left unchanged.
-To update a dependency to a newer revision, use 'godep update'.
+To update a dependency to a newer revision, use 'goderp update'.
 
 If -r is given, import statements will be rewritten to refer
 directly to the copied source code.
 
-If -copy=false is given, the list alone is written to file Godeps.
+If -copy=false is given, the list alone is written to file Goderps.
 This option is deprecated and will be removed in a future version.
 See http://goo.gl/RpYs8e for discussion.
 
-Otherwise, the list is written to Godeps/Godeps.json, and source
-code for all dependencies is copied into Godeps/_workspace.
+Otherwise, the list is written to Goderps, and source
+code for all dependencies is copied into Goderps/_workspace.
 
 For more about specifying packages, see 'go help packages'.
 `,
@@ -81,9 +81,9 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	manifest := "Godeps"
-	var gold Godeps
-	gnew := &Godeps{
+	manifest := "Goderps"
+	var gold Goderps
+	gnew := &Goderps{
 		ImportPath: dot[0].ImportPath,
 		GoVersion:  ver,
 	}
@@ -102,7 +102,7 @@ func save(pkgs []string) error {
 	}
 	if a := badSandboxVCS(gnew.Deps); a != nil {
 		log.Println("Unsupported sandbox VCS:", strings.Join(a, ", "))
-		log.Printf("Instead, run: godep save -copy %s", strings.Join(pkgs, " "))
+		log.Printf("Instead, run: goderp save -copy %s", strings.Join(pkgs, " "))
 		return errors.New("error")
 	}
 	if gnew.Deps == nil {
@@ -112,7 +112,7 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll("Godeps")
+	err = os.RemoveAll("Goderps")
 	if err != nil {
 		log.Println(err)
 	}
@@ -152,7 +152,7 @@ func (v *revError) Error() string {
 // dependency in b that appears to be from the same repo
 // as one in a (for example, a parent or child directory),
 // the Rev must already match - otherwise it is an error.
-func carryVersions(a, b *Godeps) error {
+func carryVersions(a, b *Goderps) error {
 	for i := range b.Deps {
 		err := carryVersion(a, &b.Deps[i])
 		if err != nil {
@@ -162,7 +162,7 @@ func carryVersions(a, b *Godeps) error {
 	return nil
 }
 
-func carryVersion(a *Godeps, db *Dependency) error {
+func carryVersion(a *Goderps, db *Dependency) error {
 	// First see if this exact package is already in the list.
 	for _, da := range a.Deps {
 		if db.ImportPath == da.ImportPath {
@@ -205,7 +205,7 @@ Diff:
 }
 
 // badSandboxVCS returns a list of VCSes that don't work
-// with the `godep go` sandbox code.
+// with the `goderp go` sandbox code.
 func badSandboxVCS(deps []Dependency) (a []string) {
 	for _, d := range deps {
 		if d.vcs.CreateCmd == "" {
@@ -336,11 +336,11 @@ func writeFile(name, body string) error {
 
 const (
 	Readme = `
-This directory tree is generated automatically by godep.
+This directory tree is generated automatically by goderp.
 
 Please do not edit.
 
-See https://github.com/tools/godep for more information.
+See https://github.com/tools/goderp for more information.
 `
 	copyWarning = `
 deprecated flag -copy=true
@@ -350,12 +350,12 @@ The flag -copy=true does not exist.  It's just gone.  Wow!
 	needRestore = `
 mismatched versions while migrating
 
-It looks like you are switching from the old Godeps format
+It looks like you are switching from the old Goderps format
 (from flag -copy=false). The old format is just a file; it
-doesn't contain source code. For this migration, godep needs
+doesn't contain source code. For this migration, goderp needs
 the appropriate version of each dependency to be installed in
 GOPATH, so that the source code is available to copy.
 
-To fix this, run 'godep restore'.
+To fix this, run 'goderp restore'.
 `
 )

@@ -46,8 +46,8 @@ func decl(name string) string {
 	return "var " + name + " int\n"
 }
 
-func godeps(importpath string, keyval ...string) *Godeps {
-	g := &Godeps{
+func goderps(importpath string, keyval ...string) *Goderps {
+	g := &Goderps{
 		ImportPath: importpath,
 	}
 	for i := 0; i < len(keyval); i += 2 {
@@ -67,12 +67,12 @@ func TestSave(t *testing.T) {
 		start    []*node
 		altstart []*node
 		want     []*node
-		wdep     Godeps
+		wdep     Goderps
 		werr     bool
 	}{
 		{
 			// dependency on parent directory in same repo
-			// see bug https://github.com/tools/godep/issues/70
+			// see bug https://github.com/tools/goderp/issues/70
 			cwd:  "P",
 			args: []string{"./..."},
 			start: []*node{
@@ -90,7 +90,7 @@ func TestSave(t *testing.T) {
 				{"P/main.go", pkg("P"), nil},
 				{"P/Q/main.go", pkg("Q", "P"), nil},
 			},
-			wdep: Godeps{
+			wdep: Goderps{
 				ImportPath: "P",
 				Deps:       []Dependency{},
 			},
@@ -101,7 +101,7 @@ func TestSave(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const scratch = "godeptest"
+	const scratch = "goderptest"
 	defer os.RemoveAll(scratch)
 	for _, test := range cases {
 		err = os.RemoveAll(scratch)
@@ -141,11 +141,11 @@ func TestSave(t *testing.T) {
 
 		checkTree(t, &node{src, "", test.want})
 
-		f, err := os.Open(filepath.Join(dir, "Godeps"))
+		f, err := os.Open(filepath.Join(dir, "Goderps"))
 		if err != nil {
 			t.Error(err)
 		}
-		g := new(Godeps)
+		g := new(Goderps)
 		err = json.NewDecoder(f).Decode(g)
 		if err != nil {
 			t.Error(err)
@@ -166,10 +166,10 @@ func TestSave(t *testing.T) {
 
 func makeTree(t *testing.T, tree *node, altpath string) (gopath string) {
 	walkTree(tree, tree.path, func(path string, n *node) {
-		g, isGodeps := n.body.(*Godeps)
+		g, isGoderps := n.body.(*Goderps)
 		body, _ := n.body.(string)
 		switch {
-		case isGodeps:
+		case isGoderps:
 			for i, dep := range g.Deps {
 				rel := filepath.FromSlash(dep.ImportPath)
 				dir := filepath.Join(tree.path, rel)
@@ -195,7 +195,7 @@ func makeTree(t *testing.T, tree *node, altpath string) (gopath string) {
 			dir := filepath.Dir(path)
 			run(t, dir, "git", "init") // repo might already exist, but ok
 			run(t, dir, "git", "add", ".")
-			run(t, dir, "git", "commit", "-m", "godep")
+			run(t, dir, "git", "commit", "-m", "goderp")
 			if body != "" {
 				run(t, dir, "git", "tag", body)
 			}

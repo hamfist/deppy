@@ -9,18 +9,18 @@ import (
 	"strings"
 )
 
-var spool = filepath.Join(os.TempDir(), "godep")
+var spool = filepath.Join(os.TempDir(), "goderp")
 
 var cmdGo = &Command{
 	Usage: "go command [arguments]",
 	Short: "run the go tool in a sandbox",
 	Long: `
 Go runs the go tool in a temporary GOPATH sandbox
-with the dependencies listed in file Godeps.
+with the dependencies listed in file Goderps.
 
-Any go tool command can run this way, but "godep go get"
+Any go tool command can run this way, but "goderp go get"
 is unnecessary and has been disabled. Instead, use
-"godep go install".
+"goderp go install".
 `,
 	Run: runGo,
 }
@@ -37,8 +37,8 @@ func runGo(cmd *Command, args []string) {
 	}
 	if len(args) > 0 && args[0] == "get" {
 		log.Printf("invalid subcommand: %q", "go get")
-		fmt.Fprintln(os.Stderr, "Use 'godep go install' instead.")
-		fmt.Fprintln(os.Stderr, "Run 'godep help go' for usage.")
+		fmt.Fprintln(os.Stderr, "Use 'goderp go install' instead.")
+		fmt.Fprintln(os.Stderr, "Run 'goderp help go' for usage.")
 		os.Exit(2)
 	}
 	c := exec.Command("go", args...)
@@ -56,12 +56,12 @@ func runGo(cmd *Command, args []string) {
 // entry name, fetches any necessary code, and returns a gopath
 // causing the specified dependencies to be used.
 func prepareGopath() (gopath string) {
-	dir := findGodeps()
+	dir := findGoderps()
 	if dir == "" {
-		log.Fatalln("No Godeps found (or in any parent directory)")
+		log.Fatalln("No Goderps found (or in any parent directory)")
 	}
 	log.Println(strings.TrimSpace(noSourceCodeWarning))
-	g, err := ReadAndLoadGodeps(filepath.Join(dir, "Godeps"))
+	g, err := ReadAndLoadGoderps(filepath.Join(dir, "Goderps"))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -72,17 +72,17 @@ func prepareGopath() (gopath string) {
 	return gopath
 }
 
-// findGodeps looks for a directory entry "Godeps" in the
+// findGoderps looks for a directory entry "Goderps" in the
 // current directory or any parent, and returns the containing
 // directory and whether the entry itself is a directory.
-// If Godeps can't be found, findGodeps returns "".
+// If Goderps can't be found, findGoderps returns "".
 // For any other error, it exits the program.
-func findGodeps() (dir string) {
+func findGoderps() (dir string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return findInParents(wd, "Godeps")
+	return findInParents(wd, "Goderps")
 }
 
 // isRoot returns true iff a path is a root.
@@ -164,11 +164,11 @@ func sandbox(d Dependency) (gopath string, err error) {
 }
 
 const noSourceCodeWarning = `
-warning: outdated Godeps missing source code
+warning: outdated Goderps missing source code
 
 The ability to read this format will be removed in the future.
 See http://goo.gl/RpYs8e for a discussion of the upcoming removal.
 
 To avoid this warning, ask the maintainer of this package to run
-'godep save' without flag -copy.
+'goderp save' without flag -copy.
 `
