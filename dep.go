@@ -16,9 +16,9 @@ import (
 	"code.google.com/p/go.tools/go/vcs"
 )
 
-// Godeps describes what a package needs to be rebuilt reproducibly.
-// It's the same information stored in file Godeps.
-type Godeps struct {
+// Goderps describes what a package needs to be rebuilt reproducibly.
+// It's the same information stored in file Goderps.
+type Goderps struct {
 	ImportPath string
 	GoVersion  string
 	Packages   []string `json:",omitempty"` // Arguments to save, if any.
@@ -49,7 +49,7 @@ type Dependency struct {
 }
 
 // pkgs is the list of packages to read dependencies
-func (g *Godeps) Load(pkgs []*Package) error {
+func (g *Goderps) Load(pkgs []*Package) error {
 	var err1 error
 	var path, seen []string
 	for _, p := range pkgs {
@@ -145,7 +145,7 @@ func (g *Godeps) Load(pkgs []*Package) error {
 	return err1
 }
 
-func ReadGodeps(path string, g *Godeps) error {
+func ReadGoderps(path string, g *Goderps) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -153,7 +153,7 @@ func ReadGodeps(path string, g *Godeps) error {
 	return json.NewDecoder(f).Decode(g)
 }
 
-func copyGodeps(g *Godeps) *Godeps {
+func copyGoderps(g *Goderps) *Goderps {
 	h := *g
 	h.Deps = make([]Dependency, len(g.Deps))
 	copy(h.Deps, g.Deps)
@@ -172,9 +172,9 @@ func eqDeps(a, b []Dependency) bool {
 	return ok
 }
 
-func ReadAndLoadGodeps(path string) (*Godeps, error) {
-	g := new(Godeps)
-	err := ReadGodeps(path, g)
+func ReadAndLoadGoderps(path string) (*Goderps, error) {
+	g := new(Goderps)
+	err := ReadGoderps(path, g)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func ReadAndLoadGodeps(path string) (*Godeps, error) {
 	return g, nil
 }
 
-func (g *Godeps) loadGoList() error {
+func (g *Goderps) loadGoList() error {
 	a := []string{g.ImportPath}
 	for _, d := range g.Deps {
 		a = append(a, d.ImportPath)
@@ -209,7 +209,7 @@ func (g *Godeps) loadGoList() error {
 	return nil
 }
 
-func (g *Godeps) WriteTo(w io.Writer) (int64, error) {
+func (g *Goderps) WriteTo(w io.Writer) (int64, error) {
 	b, err := json.MarshalIndent(g, "", "\t")
 	if err != nil {
 		return 0, err
@@ -332,7 +332,7 @@ func uniq(a []string) []string {
 // goVersion returns the version string of the Go compiler
 // currently installed, e.g. "go1.1rc3".
 func goVersion() (string, error) {
-	// Godep might have been compiled with a different
+	// Goderp might have been compiled with a different
 	// version, so we can't just use runtime.Version here.
 	cmd := exec.Command("go", "version")
 	cmd.Stderr = os.Stderr
