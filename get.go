@@ -41,7 +41,7 @@ func runGet(cmd *Command, args []string) {
 		if pkg.Error.Err != "" {
 			log.Fatalln(pkg.Error.Err)
 		}
-		dir, _ := findInParents(pkg.Dir, "Godeps")
+		dir := findInParents(pkg.Dir, "Godeps")
 		groups[dir] = append(groups[dir], pkg.ImportPath)
 	}
 	for dir, packages := range groups {

@@ -53,12 +53,9 @@ func restore(dep Dependency) error {
 }
 
 func findGodepsJSON() (path string) {
-	dir, isDir := findGodeps()
+	dir := findGodeps()
 	if dir == "" {
 		log.Fatalln("No Godeps found (or in any parent directory)")
-	}
-	if isDir {
-		return filepath.Join(dir, "Godeps", "Godeps.json")
 	}
 	return filepath.Join(dir, "Godeps")
 }

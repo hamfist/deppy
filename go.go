@@ -56,12 +56,9 @@ func runGo(cmd *Command, args []string) {
 // entry name, fetches any necessary code, and returns a gopath
 // causing the specified dependencies to be used.
 func prepareGopath() (gopath string) {
-	dir, isDir := findGodeps()
+	dir := findGodeps()
 	if dir == "" {
 		log.Fatalln("No Godeps found (or in any parent directory)")
-	}
-	if isDir {
-		return filepath.Join(dir, "Godeps", "_workspace")
 	}
 	log.Println(strings.TrimSpace(noSourceCodeWarning))
 	g, err := ReadAndLoadGodeps(filepath.Join(dir, "Godeps"))
@@ -80,7 +77,7 @@ func prepareGopath() (gopath string) {
 // directory and whether the entry itself is a directory.
 // If Godeps can't be found, findGodeps returns "".
 // For any other error, it exits the program.
-func findGodeps() (dir string, isDir bool) {
+func findGodeps() (dir string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
@@ -104,11 +101,11 @@ func isRoot(p string) bool {
 // findInParents returns the path to the directory containing name
 // in dir or any ancestor, and whether name itself is a directory.
 // If name cannot be found, findInParents returns the empty string.
-func findInParents(dir, name string) (container string, isDir bool) {
+func findInParents(dir, name string) (container string) {
 	for {
-		fi, err := os.Stat(filepath.Join(dir, name))
+		_, err := os.Stat(filepath.Join(dir, name))
 		if os.IsNotExist(err) && isRoot(dir) {
-			return "", false
+			return ""
 		}
 		if os.IsNotExist(err) {
 			dir = filepath.Dir(dir)
@@ -117,7 +114,7 @@ func findInParents(dir, name string) (container string, isDir bool) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		return dir, fi.IsDir()
+		return dir
 	}
 }
 

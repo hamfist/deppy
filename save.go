@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -59,7 +58,7 @@ var (
 )
 
 func init() {
-	cmdSave.Flag.BoolVar(&saveCopy, "copy", true, "copy source code")
+	cmdSave.Flag.BoolVar(&saveCopy, "copy", false, "copy source code")
 	cmdSave.Flag.BoolVar(&saveR, "r", false, "rewrite import paths")
 }
 
@@ -71,7 +70,7 @@ func runSave(cmd *Command, args []string) {
 }
 
 func save(pkgs []string) error {
-	if !saveCopy {
+	if saveCopy {
 		log.Println(strings.TrimSpace(copyWarning))
 	}
 	dot, err := LoadPackages(".")
@@ -83,14 +82,7 @@ func save(pkgs []string) error {
 		return err
 	}
 	manifest := "Godeps"
-	if saveCopy {
-		manifest = filepath.Join("Godeps", "Godeps.json")
-	}
 	var gold Godeps
-	oldIsFile, err := readOldGodeps(&gold)
-	if err != nil {
-		return err
-	}
 	gnew := &Godeps{
 		ImportPath: dot[0].ImportPath,
 		GoVersion:  ver,
@@ -108,7 +100,7 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	if a := badSandboxVCS(gnew.Deps); a != nil && !saveCopy {
+	if a := badSandboxVCS(gnew.Deps); a != nil {
 		log.Println("Unsupported sandbox VCS:", strings.Join(a, ", "))
 		log.Printf("Instead, run: godep save -copy %s", strings.Join(pkgs, " "))
 		return errors.New("error")
@@ -116,33 +108,13 @@ func save(pkgs []string) error {
 	if gnew.Deps == nil {
 		gnew.Deps = make([]Dependency, 0) // produce json [], not null
 	}
-	gdisk := copyGodeps(gnew)
 	err = carryVersions(&gold, gnew)
 	if err != nil {
 		return err
 	}
-	if saveCopy && oldIsFile {
-		// If we are migrating from an old format file,
-		// we require that the listed version of every
-		// dependency must be installed in GOPATH, so it's
-		// available to copy.
-		if !eqDeps(gnew.Deps, gdisk.Deps) {
-			return errors.New(strings.TrimSpace(needRestore))
-		}
-		gold = Godeps{}
-	}
-	if saveCopy {
-		os.Remove("Godeps") // remove regular file if present; ignore error
-		path := filepath.Join("Godeps", "Readme")
-		err = writeFile(path, strings.TrimSpace(Readme)+"\n")
-		if err != nil {
-			log.Println(err)
-		}
-	} else {
-		err = os.RemoveAll("Godeps")
-		if err != nil {
-			log.Println(err)
-		}
+	err = os.RemoveAll("Godeps")
+	if err != nil {
+		log.Println(err)
 	}
 	f, err := os.Create(manifest)
 	if err != nil {
@@ -156,25 +128,6 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	if saveCopy {
-		// We use a name starting with "_" so the go tool
-		// ignores this directory when traversing packages
-		// starting at the project's root. For example,
-		//   godep go list ./...
-		workspace := filepath.Join("Godeps", "_workspace")
-		srcdir := filepath.Join(workspace, "src")
-		rem := subDeps(gold.Deps, gnew.Deps)
-		add := subDeps(gnew.Deps, gold.Deps)
-		err = removeSrc(srcdir, rem)
-		if err != nil {
-			return err
-		}
-		err = copySrc(srcdir, add)
-		if err != nil {
-			return err
-		}
-		writeVCSIgnore(workspace)
-	}
 	var rewritePaths []string
 	if saveR {
 		for _, dep := range gnew.Deps {
@@ -182,22 +135,6 @@ func save(pkgs []string) error {
 		}
 	}
 	return rewrite(a, dot[0].ImportPath, rewritePaths)
-}
-
-func readOldGodeps(g *Godeps) (isFile bool, err error) {
-	f, err := os.Open(filepath.Join("Godeps", "Godeps.json"))
-	if err != nil {
-		isFile = true
-		f, err = os.Open("Godeps")
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	if err != nil {
-		return false, err
-	}
-	err = json.NewDecoder(f).Decode(g)
-	return isFile, err
 }
 
 type revError struct {
@@ -406,11 +343,9 @@ Please do not edit.
 See https://github.com/tools/godep for more information.
 `
 	copyWarning = `
-deprecated flag -copy=false
+deprecated flag -copy=true
 
-The flag -copy=false will be removed in a future version of godep.
-See http://goo.gl/RpYs8e for a discussion of the upcoming removal.
-To avoid this warning, run 'godep save' without flag -copy.
+The flag -copy=true does not exist.  It's just gone.  Wow!
 `
 	needRestore = `
 mismatched versions while migrating
