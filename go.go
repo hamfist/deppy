@@ -60,7 +60,6 @@ func prepareGopath() (gopath string) {
 	if dir == "" {
 		log.Fatalln("No Goderps found (or in any parent directory)")
 	}
-	log.Println(strings.TrimSpace(noSourceCodeWarning))
 	g, err := ReadAndLoadGoderps(filepath.Join(dir, "Goderps"))
 	if err != nil {
 		log.Fatalln(err)
@@ -162,13 +161,3 @@ func sandbox(d Dependency) (gopath string, err error) {
 	}
 	return d.Gopath(), nil
 }
-
-const noSourceCodeWarning = `
-warning: outdated Goderps missing source code
-
-The ability to read this format will be removed in the future.
-See http://goo.gl/RpYs8e for a discussion of the upcoming removal.
-
-To avoid this warning, ask the maintainer of this package to run
-'goderp save' without flag -copy.
-`

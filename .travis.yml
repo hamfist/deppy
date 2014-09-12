@@ -4,3 +4,5 @@ go:
 before_script:
 - git config --global user.name Travis
 - git config --global user.email travis@example.org
+script:
+- go test -cover -v ./...
