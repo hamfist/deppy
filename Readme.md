@@ -11,6 +11,10 @@ that works with Go 1 or newer.
 
 	$ go get github.com/meatballhat/goderp
 
+### Migrating from godep
+
+	$ git mv Godep Goderp
+	
 #### Getting Started
 
 How to add goderp in a new project.
