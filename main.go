@@ -10,8 +10,8 @@ import (
 	"text/template"
 )
 
-// A Command is an implementation of a goderp command
-// like goderp save or goderp go.
+// Command is an implementation of a goderp command like goderp
+// save or goderp go.
 type Command struct {
 	// Run runs the command.
 	// The args are the arguments after the command name.
@@ -32,6 +32,7 @@ type Command struct {
 	Flag flag.FlagSet
 }
 
+// Name provides a human-friendly display name of the command
 func (c *Command) Name() string {
 	name := c.Usage
 	i := strings.Index(name, " ")
@@ -41,6 +42,7 @@ func (c *Command) Name() string {
 	return name
 }
 
+// UsageExit prints the usage to stderr and exits 2
 func (c *Command) UsageExit() {
 	fmt.Fprintf(os.Stderr, "Usage: goderp %s\n\n", c.Usage)
 	fmt.Fprintf(os.Stderr, "Run 'goderp help %s' for help.\n", c.Name())

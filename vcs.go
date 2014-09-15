@@ -11,6 +11,7 @@ import (
 	"code.google.com/p/go.tools/go/vcs"
 )
 
+// VCS is a version control abstraction
 type VCS struct {
 	vcs *vcs.Cmd
 
@@ -72,6 +73,8 @@ var cmd = map[*vcs.Cmd]*VCS{
 	vcsHg.vcs:  vcsHg,
 }
 
+// VCSFromDir builds a vcs command if the vcs detected from the
+// directory is supported
 func VCSFromDir(dir, srcRoot string) (*VCS, string, error) {
 	vcscmd, reporoot, err := vcs.FromDir(dir, srcRoot)
 	if err != nil {
@@ -84,6 +87,8 @@ func VCSFromDir(dir, srcRoot string) (*VCS, string, error) {
 	return vcsext, reporoot, nil
 }
 
+// VCSForImportPath builds a vcs command if the vcs detected from
+// the import path is supported
 func VCSForImportPath(importPath string) (*VCS, *vcs.RepoRoot, error) {
 	rr, err := vcs.RepoRootForImportPath(importPath, false)
 	if err != nil {

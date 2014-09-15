@@ -126,7 +126,6 @@ func TestSave(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		saveR = test.flagR
 		err = save(test.args)
 		if g := err != nil; g != test.werr {
 			if err != nil {

@@ -18,8 +18,8 @@ var cmdSave = &Command{
 	Short: "list and copy dependencies into Goderps",
 	Long: `
 Save writes a list of the dependencies of the named packages along
-with the exact source control revision of each dependency, and copies
-their source code into a subdirectory.
+with the exact source control revision of each dependency to a file
+named "Goderps".
 
 The dependency list is a JSON document with the following structure:
 
@@ -35,17 +35,6 @@ The dependency list is a JSON document with the following structure:
 	}
 
 Any dependencies already present in the list will be left unchanged.
-To update a dependency to a newer revision, use 'goderp update'.
-
-If -r is given, import statements will be rewritten to refer
-directly to the copied source code.
-
-If -copy=false is given, the list alone is written to file Goderps.
-This option is deprecated and will be removed in a future version.
-See http://goo.gl/RpYs8e for discussion.
-
-Otherwise, the list is written to Goderps, and source
-code for all dependencies is copied into Goderps/_workspace.
 
 For more about specifying packages, see 'go help packages'.
 `,
@@ -54,12 +43,10 @@ For more about specifying packages, see 'go help packages'.
 
 var (
 	saveCopy = true
-	saveR    = false
 )
 
 func init() {
 	cmdSave.Flag.BoolVar(&saveCopy, "copy", false, "copy source code")
-	cmdSave.Flag.BoolVar(&saveR, "r", false, "rewrite import paths")
 }
 
 func runSave(cmd *Command, args []string) {
@@ -102,7 +89,6 @@ func save(pkgs []string) error {
 	}
 	if a := badSandboxVCS(gnew.Deps); a != nil {
 		log.Println("Unsupported sandbox VCS:", strings.Join(a, ", "))
-		log.Printf("Instead, run: goderp save -copy %s", strings.Join(pkgs, " "))
 		return errors.New("error")
 	}
 	if gnew.Deps == nil {
@@ -129,11 +115,6 @@ func save(pkgs []string) error {
 		return err
 	}
 	var rewritePaths []string
-	if saveR {
-		for _, dep := range gnew.Deps {
-			rewritePaths = append(rewritePaths, dep.ImportPath)
-		}
-	}
 	return rewrite(a, dot[0].ImportPath, rewritePaths)
 }
 
@@ -335,27 +316,9 @@ func writeFile(name, body string) error {
 }
 
 const (
-	Readme = `
-This directory tree is generated automatically by goderp.
-
-Please do not edit.
-
-See https://github.com/meatballhat/goderp for more information.
-`
 	copyWarning = `
 deprecated flag -copy=true
 
 The flag -copy=true does not exist.  It's just gone.  Wow!
-`
-	needRestore = `
-mismatched versions while migrating
-
-It looks like you are switching from the old Goderps format
-(from flag -copy=false). The old format is just a file; it
-doesn't contain source code. For this migration, goderp needs
-the appropriate version of each dependency to be installed in
-GOPATH, so that the source code is available to copy.
-
-To fix this, run 'goderp restore'.
 `
 )

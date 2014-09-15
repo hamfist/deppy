@@ -48,7 +48,7 @@ type Dependency struct {
 	vcs       *VCS
 }
 
-// pkgs is the list of packages to read dependencies
+// Load expects pkgs to be the list of packages to read dependencies
 func (g *Goderps) Load(pkgs []*Package) error {
 	var err1 error
 	var path, seen []string
@@ -145,6 +145,8 @@ func (g *Goderps) Load(pkgs []*Package) error {
 	return err1
 }
 
+// ReadGoderps deserializes the content of a Goderps file into a
+// provided *Goderps struct
 func ReadGoderps(path string, g *Goderps) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -172,6 +174,8 @@ func eqDeps(a, b []Dependency) bool {
 	return ok
 }
 
+// ReadAndLoadGoderps populates a *Goderps from a file path, which
+// is presumably a Goderps file
 func ReadAndLoadGoderps(path string) (*Goderps, error) {
 	g := new(Goderps)
 	err := ReadGoderps(path, g)
@@ -209,6 +213,8 @@ func (g *Goderps) loadGoList() error {
 	return nil
 }
 
+// WriteTo serializes this *Goderps to JSON and writes to the
+// provided writer
 func (g *Goderps) WriteTo(w io.Writer) (int64, error) {
 	b, err := json.MarshalIndent(g, "", "\t")
 	if err != nil {
@@ -218,7 +224,7 @@ func (g *Goderps) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), err
 }
 
-// Returns a path to the local copy of d's repository.
+// RepoPath returns a path to the local copy of d's repository.
 // E.g.
 //
 //   ImportPath             RepoPath
@@ -228,12 +234,13 @@ func (d Dependency) RepoPath() string {
 	return filepath.Join(spool, "repo", d.repoRoot.Root)
 }
 
-// Returns a URL for the remote copy of the repository.
+// RemoteURL returns a URL for the remote copy of the repository.
 func (d Dependency) RemoteURL() string {
 	return d.repoRoot.Repo
 }
 
-// Returns the url of a local disk clone of the repo, if any.
+// FastRemotePath returns the url of a local disk clone of the
+// repo, if any.
 func (d Dependency) FastRemotePath() string {
 	if d.outerRoot != "" {
 		return d.outerRoot + "/src/" + d.repoRoot.Root
@@ -241,23 +248,23 @@ func (d Dependency) FastRemotePath() string {
 	return ""
 }
 
-// Returns a path to the checked-out copy of d's commit.
+// Workdir returns a path to the checked-out copy of d's commit.
 func (d Dependency) Workdir() string {
 	return filepath.Join(d.Gopath(), "src", d.ImportPath)
 }
 
-// Returns a path to the checked-out copy of d's repo root.
+// WorkdirRoot returns a path to the checked-out copy of d's repo root.
 func (d Dependency) WorkdirRoot() string {
 	return filepath.Join(d.Gopath(), "src", d.repoRoot.Root)
 }
 
-// Returns a path to a parent of Workdir such that using
+// Gopath returns a path to a parent of Workdir such that using
 // Gopath in GOPATH makes d available to the go tool.
 func (d Dependency) Gopath() string {
 	return filepath.Join(spool, "rev", d.Rev[:2], d.Rev[2:])
 }
 
-// Creates an empty repo in d.RepoPath().
+// CreateRepo creates an empty repo in d.RepoPath().
 func (d Dependency) CreateRepo(fastRemote, mainRemote string) error {
 	if err := os.MkdirAll(d.RepoPath(), 0777); err != nil {
 		return err
