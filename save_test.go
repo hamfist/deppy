@@ -46,8 +46,8 @@ func decl(name string) string {
 	return "var " + name + " int\n"
 }
 
-func goderps(importpath string, keyval ...string) *Goderps {
-	g := &Goderps{
+func deppy(importpath string, keyval ...string) *Deps {
+	g := &Deps{
 		ImportPath: importpath,
 	}
 	for i := 0; i < len(keyval); i += 2 {
@@ -67,7 +67,7 @@ func TestSave(t *testing.T) {
 		start    []*node
 		altstart []*node
 		want     []*node
-		wdep     Goderps
+		wdep     Deps
 		werr     bool
 	}{
 		{
@@ -90,7 +90,7 @@ func TestSave(t *testing.T) {
 				{"P/main.go", pkg("P"), nil},
 				{"P/Q/main.go", pkg("Q", "P"), nil},
 			},
-			wdep: Goderps{
+			wdep: Deps{
 				ImportPath: "P",
 				Deps:       []Dependency{},
 			},
@@ -140,11 +140,11 @@ func TestSave(t *testing.T) {
 
 		checkTree(t, &node{src, "", test.want})
 
-		f, err := os.Open(filepath.Join(dir, "Goderps"))
+		f, err := os.Open(filepath.Join(dir, "Deps"))
 		if err != nil {
 			t.Error(err)
 		}
-		g := new(Goderps)
+		g := new(Deps)
 		err = json.NewDecoder(f).Decode(g)
 		if err != nil {
 			t.Error(err)
@@ -165,10 +165,10 @@ func TestSave(t *testing.T) {
 
 func makeTree(t *testing.T, tree *node, altpath string) (gopath string) {
 	walkTree(tree, tree.path, func(path string, n *node) {
-		g, isGoderps := n.body.(*Goderps)
+		g, isDeps := n.body.(*Deps)
 		body, _ := n.body.(string)
 		switch {
-		case isGoderps:
+		case isDeps:
 			for i, dep := range g.Deps {
 				rel := filepath.FromSlash(dep.ImportPath)
 				dir := filepath.Join(tree.path, rel)

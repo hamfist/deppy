@@ -1,71 +1,70 @@
-### Goderp
+### Deppy
 
-Command goderp helps build packages reproducibly by fixing their
+Command deppy helps build packages reproducibly by fixing their
 dependencies.
 
 This tool assumes you are working in a standard Go workspace, as
 described in http://golang.org/doc/code.html. We require Go 1.1 or
-newer to build goderp itself, but you can use it on any project
+newer to build deppy itself, but you can use it on any project
 that works with Go 1 or newer.
 
 ### Install
 
 ``` bash
-go get github.com/meatballhat/goderp
+go get github.com/meatballhat/deppy
 ```
 
 ### Migrating from godep
 
 ``` bash
-git mv Godep Goderp
+git mv Godep Deps
 ```
 	
 #### Getting Started
 
-How to add goderp in a new project.
+How to add deppy in a new project.
 
 Assuming you've got everything working already, so you can build
 your project with `go install` and test it with `go test`, it's
 one command to start using:
 
 ``` bash
-goderp save
+deppy save
 ```
 
-This will save a list of dependencies to the file `Goderps`, Read
+This will save a list of dependencies to the file `Deps`, Read
 over its contents and make sure it looks reasonable.  Then commit
 the file to version control.
 
 #### Restore
 
-The `goderp restore` command is the opposite of `goderp save`.  It
-will install the package versions specified in `Goderps` to your
+The `deppy restore` command is the opposite of `deppy save`.  It
+will install the package versions specified in `Deps` to your
 `$GOPATH`.
 
 #### Edit-test Cycle
 
-1. Edit code
-2. Run `goderp go test`
-3. (repeat)
+0. Edit code
+0. Run `deppy go test`
+0. (repeat)
 
 #### Add a Dependency
 
 To add a new package foo/bar, do this:
 
-1. Run `go get foo/bar`
-2. Edit your code to import foo/bar.
-3. Run `goderp save` (or `goderp save ./...`).
+0. Run `go get foo/bar`
+0. Edit your code to import foo/bar.
+0. Run `deppy save` (or `deppy save ./...`).
 
 #### Update a Dependency
 
 To update a package from your `$GOPATH`, do this:
 
-1. Run `go get -u foo/bar`
-2. Run `goderp update foo/bar`. (You can use the `...` wildcard,
-for example `goderp update foo/...`).
+0. Run `go get -u foo/bar`
+0. Run `deppy save` (or `deppy save ./...`).
 
 Before committing the change, you'll probably want to inspect
-the changes to `Goderps`, for example with `git diff`,
+the changes to `Deps`, for example with `git diff`,
 and make sure it looks reasonable.
 
 #### Multiple Packages
@@ -73,30 +72,30 @@ and make sure it looks reasonable.
 If your repository has more than one package, you're probably
 accustomed to running commands like `go test ./...`,
 `go install ./...`, and `go fmt ./...`.
-Similarly, you should run `goderp save ./...` to capture the
+Similarly, you should run `deppy save ./...` to capture the
 dependencies of all packages.
 
 #### Using Other Tools
 
-The `goderp path` command helps integrate with commands other than
+The `deppy path` command helps integrate with commands other than
 the standard go tool. This works with any tool that reads `$GOPATH`
 from its environment, for example the recently-released [oracle
 command](http://godoc.org/code.google.com/p/go.tools/cmd/oracle).
 
 ``` bash
-GOPATH=`goderp path`:$GOPATH
+GOPATH=`deppy path`:$GOPATH
 oracle -mode=implements .
 ```
 
 ### File Format
 
-`Goderps` is a json file with the following structure:
+`Deps` is a json file with the following structure:
 
 ```go
-type Goderps struct {
+type Deps struct {
 	ImportPath string
 	GoVersion  string   // Abridged output of 'go version'.
-	Packages   []string // Arguments to goderp save, if any.
+	Packages   []string // Arguments to deppy save, if any.
 	Deps       []struct {
 		ImportPath string
 		Comment    string // Description of commit, if present.
@@ -105,12 +104,12 @@ type Goderps struct {
 }
 ```
 
-Example `Goderps`:
+Example `Deps`:
 
 ```json
 {
     "ImportPath": "github.com/kr/hk",
-    "GoVersion": "go1.1.2",
+    "GoVersion": "go1.3.2",
     "Deps": [
         {
             "ImportPath": "code.google.com/p/go-netrc/netrc",
@@ -126,10 +125,10 @@ Example `Goderps`:
 
 ### Plagiarism Alert
 
-Goderp is a fork of [Godep](github.com/tools/godep), and makes no
+Deppy is a fork of [Godep](github.com/tools/godep), and makes no
 attempt to hide it.  Take a look at the repo history.  It's all
 there.  The code fork is a reflection of the philosophical fork
 that happened in the Godep project when `save -copy=false` was
-deprecated and slated for removal.  Goderp chooses the other path,
+deprecated and slated for removal.  Deppy chooses the other path,
 making `save -copy=false` the default behavior and `save
 -copy=true` into a no-op.

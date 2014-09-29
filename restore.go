@@ -10,13 +10,13 @@ var cmdRestore = &Command{
 	Usage: "restore",
 	Short: "check out listed dependency versions in GOPATH",
 	Long: `
-Restore checks out the Goderps-specified version of each package in GOPATH.
+Restore checks out the Deps-specified version of each package in GOPATH.
 `,
 	Run: runRestore,
 }
 
 func runRestore(cmd *Command, args []string) {
-	g, err := ReadAndLoadGoderps(findGoderpsJSON())
+	g, err := ReadAndLoadDeps(findDepsJSON())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -52,10 +52,10 @@ func restore(dep Dependency) error {
 	return dep.vcs.RevSync(pkg.Dir, dep.Rev)
 }
 
-func findGoderpsJSON() (path string) {
-	dir := findGoderps()
+func findDepsJSON() (path string) {
+	dir := findDeps()
 	if dir == "" {
-		log.Fatalln("No Goderps found (or in any parent directory)")
+		log.Fatalln("No Deps found (or in any parent directory)")
 	}
-	return filepath.Join(dir, "Goderps")
+	return filepath.Join(dir, "Deps")
 }

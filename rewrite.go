@@ -15,7 +15,7 @@ import (
 )
 
 // rewrite visits the go files in pkgs, plus all go files
-// in the directory tree Goderps, rewriting import statments
+// in the directory tree Deps, rewriting import statments
 // according to the rules for func qualify.
 func rewrite(pkgs []*Package, qual string, paths []string) error {
 	for _, path := range pkgFiles(pkgs) {
@@ -24,7 +24,7 @@ func rewrite(pkgs []*Package, qual string, paths []string) error {
 			return err
 		}
 	}
-	return rewriteTree("Goderps", qual, paths)
+	return rewriteTree("Deps", qual, paths)
 }
 
 // pkgFiles returns the full filesystem path to all go files in pkgs.
@@ -101,16 +101,16 @@ func rewriteGoFile(name, qual string, paths []string) error {
 // sep is the signature set of path elements that
 // precede the original path of an imported package
 // in a rewritten import path.
-const sep = "/Goderps/_workspace/src/"
+const sep = "/Deps/_workspace/src/"
 
 // unqualify returns the part of importPath after the last
 // occurrence of the signature path elements
-// (Goderps/_workspace/src) that always precede imported
+// (Deps/_workspace/src) that always precede imported
 // packages in rewritten import paths.
 //
 // For example,
 //   unqualify(C)                         = C
-//   unqualify(D/Goderps/_workspace/src/C) = C
+//   unqualify(D/Deps/_workspace/src/C) = C
 func unqualify(importPath string) string {
 	if i := strings.LastIndex(importPath, sep); i != -1 {
 		importPath = importPath[i+len(sep):]
@@ -119,7 +119,7 @@ func unqualify(importPath string) string {
 }
 
 // qualify qualifies importPath with its corresponding import
-// path in the Goderps src copy of package pkg. If importPath
+// path in the Deps src copy of package pkg. If importPath
 // is a directory lexically contained in a path in paths,
 // it will be qualified with package pkg; otherwise, it will
 // be returned unchanged.
@@ -128,9 +128,9 @@ func unqualify(importPath string) string {
 //   importPath  returns
 //   C           C
 //   fmt         fmt
-//   D           C/Goderps/_workspace/src/D
-//   D/P         C/Goderps/_workspace/src/D/P
-//   T           C/Goderps/_workspace/src/T
+//   D           C/Deps/_workspace/src/D
+//   D/P         C/Deps/_workspace/src/D/P
+//   T           C/Deps/_workspace/src/T
 func qualify(importPath, pkg string, paths []string) string {
 	if containsPathPrefix(paths, importPath) {
 		return pkg + sep + importPath
