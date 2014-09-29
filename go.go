@@ -9,18 +9,18 @@ import (
 	"strings"
 )
 
-var spool = filepath.Join(os.TempDir(), "goderp")
+var spool = filepath.Join(os.TempDir(), "deppy")
 
 var cmdGo = &Command{
 	Usage: "go command [arguments]",
 	Short: "run the go tool in a sandbox",
 	Long: `
 Go runs the go tool in a temporary GOPATH sandbox
-with the dependencies listed in file Goderps.
+with the dependencies listed in file Deps.
 
-Any go tool command can run this way, but "goderp go get"
+Any go tool command can run this way, but "deppy go get"
 is unnecessary and has been disabled. Instead, use
-"goderp go install".
+"deppy go install".
 `,
 	Run: runGo,
 }
@@ -37,8 +37,8 @@ func runGo(cmd *Command, args []string) {
 	}
 	if len(args) > 0 && args[0] == "get" {
 		log.Printf("invalid subcommand: %q", "go get")
-		fmt.Fprintln(os.Stderr, "Use 'goderp go install' instead.")
-		fmt.Fprintln(os.Stderr, "Run 'goderp help go' for usage.")
+		fmt.Fprintln(os.Stderr, "Use 'deppy go install' instead.")
+		fmt.Fprintln(os.Stderr, "Run 'deppy help go' for usage.")
 		os.Exit(2)
 	}
 	c := exec.Command("go", args...)
@@ -56,11 +56,11 @@ func runGo(cmd *Command, args []string) {
 // entry name, fetches any necessary code, and returns a gopath
 // causing the specified dependencies to be used.
 func prepareGopath() (gopath string) {
-	dir := findGoderps()
+	dir := findDeps()
 	if dir == "" {
-		log.Fatalln("No Goderps found (or in any parent directory)")
+		log.Fatalln("No Deps found (or in any parent directory)")
 	}
-	g, err := ReadAndLoadGoderps(filepath.Join(dir, "Goderps"))
+	g, err := ReadAndLoadDeps(filepath.Join(dir, "Deps"))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -71,17 +71,17 @@ func prepareGopath() (gopath string) {
 	return gopath
 }
 
-// findGoderps looks for a directory entry "Goderps" in the
+// findDeps looks for a directory entry "Deps" in the
 // current directory or any parent, and returns the containing
 // directory and whether the entry itself is a directory.
-// If Goderps can't be found, findGoderps returns "".
+// If Deps can't be found, findDeps returns "".
 // For any other error, it exits the program.
-func findGoderps() (dir string) {
+func findDeps() (dir string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return findInParents(wd, "Goderps")
+	return findInParents(wd, "Deps")
 }
 
 // isRoot returns true iff a path is a root.

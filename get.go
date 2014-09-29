@@ -11,9 +11,9 @@ var cmdGet = &Command{
 	Short: "download and install packages with specified dependencies",
 	Long: `
 Get downloads to GOPATH the packages named by the import paths, and installs
-them with the dependencies specified in their Goderps files.
+them with the dependencies specified in their Deps files.
 
-If any of the packages do not have Goderps files, those are installed
+If any of the packages do not have Deps files, those are installed
 as if by go get.
 
 For more about specifying packages, see 'go help packages'.
@@ -31,7 +31,7 @@ func runGet(cmd *Command, args []string) {
 		log.Fatalln(err)
 	}
 
-	// group import paths by Goderps location
+	// group import paths by Deps location
 	groups := make(map[string][]string)
 	ps, err := LoadPackages(args...)
 	if err != nil {
@@ -41,7 +41,7 @@ func runGet(cmd *Command, args []string) {
 		if pkg.Error.Err != "" {
 			log.Fatalln(pkg.Error.Err)
 		}
-		dir := findInParents(pkg.Dir, "Goderps")
+		dir := findInParents(pkg.Dir, "Deps")
 		groups[dir] = append(groups[dir], pkg.ImportPath)
 	}
 	for dir, packages := range groups {
@@ -49,7 +49,7 @@ func runGet(cmd *Command, args []string) {
 		if dir == "" {
 			c = command("go", "install", packages)
 		} else {
-			c = command("goderp", "go", "install", packages)
+			c = command("deppy", "go", "install", packages)
 			c.Dir = dir
 		}
 		if err := c.Run(); err != nil {

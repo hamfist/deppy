@@ -16,9 +16,9 @@ import (
 	"code.google.com/p/go.tools/go/vcs"
 )
 
-// Goderps describes what a package needs to be rebuilt reproducibly.
-// It's the same information stored in file Goderps.
-type Goderps struct {
+// Deps describes what a package needs to be rebuilt reproducibly.
+// It's the same information stored in file Deps.
+type Deps struct {
 	ImportPath string
 	GoVersion  string
 	Packages   []string `json:",omitempty"` // Arguments to save, if any.
@@ -49,7 +49,7 @@ type Dependency struct {
 }
 
 // Load expects pkgs to be the list of packages to read dependencies
-func (g *Goderps) Load(pkgs []*Package) error {
+func (g *Deps) Load(pkgs []*Package) error {
 	var err1 error
 	var path, seen []string
 	for _, p := range pkgs {
@@ -145,9 +145,9 @@ func (g *Goderps) Load(pkgs []*Package) error {
 	return err1
 }
 
-// ReadGoderps deserializes the content of a Goderps file into a
-// provided *Goderps struct
-func ReadGoderps(path string, g *Goderps) error {
+// ReadDeps deserializes the content of a Deps file into a
+// provided *Deps struct
+func ReadDeps(path string, g *Deps) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -155,7 +155,7 @@ func ReadGoderps(path string, g *Goderps) error {
 	return json.NewDecoder(f).Decode(g)
 }
 
-func copyGoderps(g *Goderps) *Goderps {
+func copyDeps(g *Deps) *Deps {
 	h := *g
 	h.Deps = make([]Dependency, len(g.Deps))
 	copy(h.Deps, g.Deps)
@@ -174,11 +174,11 @@ func eqDeps(a, b []Dependency) bool {
 	return ok
 }
 
-// ReadAndLoadGoderps populates a *Goderps from a file path, which
-// is presumably a Goderps file
-func ReadAndLoadGoderps(path string) (*Goderps, error) {
-	g := new(Goderps)
-	err := ReadGoderps(path, g)
+// ReadAndLoadDeps populates a *Deps from a file path, which
+// is presumably a Deps file
+func ReadAndLoadDeps(path string) (*Deps, error) {
+	g := new(Deps)
+	err := ReadDeps(path, g)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func ReadAndLoadGoderps(path string) (*Goderps, error) {
 	return g, nil
 }
 
-func (g *Goderps) loadGoList() error {
+func (g *Deps) loadGoList() error {
 	a := []string{g.ImportPath}
 	for _, d := range g.Deps {
 		a = append(a, d.ImportPath)
@@ -213,9 +213,9 @@ func (g *Goderps) loadGoList() error {
 	return nil
 }
 
-// WriteTo serializes this *Goderps to JSON and writes to the
+// WriteTo serializes this *Deps to JSON and writes to the
 // provided writer
-func (g *Goderps) WriteTo(w io.Writer) (int64, error) {
+func (g *Deps) WriteTo(w io.Writer) (int64, error) {
 	b, err := json.MarshalIndent(g, "", "\t")
 	if err != nil {
 		return 0, err
@@ -339,7 +339,7 @@ func uniq(a []string) []string {
 // goVersion returns the version string of the Go compiler
 // currently installed, e.g. "go1.1rc3".
 func goVersion() (string, error) {
-	// Goderp might have been compiled with a different
+	// deppy might have been compiled with a different
 	// version, so we can't just use runtime.Version here.
 	cmd := exec.Command("go", "version")
 	cmd.Stderr = os.Stderr

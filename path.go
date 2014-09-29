@@ -9,7 +9,7 @@ var cmdPath = &Command{
 	Short: "print sandbox path for use in a GOPATH",
 	Long: `
 Path ensures a sandbox is prepared for the dependencies
-in file Goderps. It prints a path for use in a GOPATH
+in file Deps. It prints a path for use in a GOPATH
 that makes available the specified version of each dependency.
 
 The printed path does not include any GOPATH value from

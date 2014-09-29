@@ -15,18 +15,18 @@ import (
 
 var cmdSave = &Command{
 	Usage: "save [-r] [-copy=false] [packages]",
-	Short: "list and copy dependencies into Goderps",
+	Short: "list and copy dependencies into Deps",
 	Long: `
 Save writes a list of the dependencies of the named packages along
 with the exact source control revision of each dependency to a file
-named "Goderps".
+named "Deps".
 
 The dependency list is a JSON document with the following structure:
 
-	type Goderps struct {
+	type Deps struct {
 		ImportPath string
 		GoVersion  string   // Abridged output of 'go version'.
-		Packages   []string // Arguments to goderp save, if any.
+		Packages   []string // Arguments to deppy save, if any.
 		Deps       []struct {
 			ImportPath string
 			Comment    string // Tag or description of commit.
@@ -68,9 +68,9 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	manifest := "Goderps"
-	var gold Goderps
-	gnew := &Goderps{
+	manifest := "Deps"
+	var gold Deps
+	gnew := &Deps{
 		ImportPath: dot[0].ImportPath,
 		GoVersion:  ver,
 	}
@@ -98,7 +98,7 @@ func save(pkgs []string) error {
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll("Goderps")
+	err = os.RemoveAll("Deps")
 	if err != nil {
 		log.Println(err)
 	}
@@ -133,7 +133,7 @@ func (v *revError) Error() string {
 // dependency in b that appears to be from the same repo
 // as one in a (for example, a parent or child directory),
 // the Rev must already match - otherwise it is an error.
-func carryVersions(a, b *Goderps) error {
+func carryVersions(a, b *Deps) error {
 	for i := range b.Deps {
 		err := carryVersion(a, &b.Deps[i])
 		if err != nil {
@@ -143,7 +143,7 @@ func carryVersions(a, b *Goderps) error {
 	return nil
 }
 
-func carryVersion(a *Goderps, db *Dependency) error {
+func carryVersion(a *Deps, db *Dependency) error {
 	// First see if this exact package is already in the list.
 	for _, da := range a.Deps {
 		if db.ImportPath == da.ImportPath {
@@ -186,7 +186,7 @@ Diff:
 }
 
 // badSandboxVCS returns a list of VCSes that don't work
-// with the `goderp go` sandbox code.
+// with the `deppy go` sandbox code.
 func badSandboxVCS(deps []Dependency) (a []string) {
 	for _, d := range deps {
 		if d.vcs.CreateCmd == "" {

@@ -1,21 +1,21 @@
 /*
 
-Command goderp helps build packages reproducibly by fixing
+Command deppy helps build packages reproducibly by fixing
 their dependencies.
 
 Example Usage
 
-Save currently-used dependencies to file Goderps:
+Save currently-used dependencies to file Deps:
 
-	$ goderp save
+	$ deppy save
 
 Build project using saved dependencies:
 
-	$ goderp go install
+	$ deppy go install
 
 or
 
-	$ GOPATH=`goderp path`:$GOPATH
+	$ GOPATH=`deppy path`:$GOPATH
 	$ go install
 
 */
