@@ -11,6 +11,15 @@ before_script:
 - git config --global user.name Travis
 - git config --global user.email travis@example.org
 script:
+- go build -x ./...
 - gofmt -l .
 - golint .
 - go test -cover -v ./...
+addons:
+  artifacts:
+    bucket: hamfist
+    key:
+      secure: ZLws+O5qbG4IzchOh2N+dN2T73J0tLz4BvyezpEDlt7V8UqNBqXrmFm4RWzyrdd4D7umYVuXYBSIuMPt3Ua0z2lU62qoNJ3+z51vPA78TIQ3v3lgDPiZStgnL0558HJxlQBLn/FBJIRd9D5YzxVGAJy0q5i8XrfGmcIqQFhCdfs=
+    secret:
+      secure: TnG9hRHsNzrBQWVgw7VL8l+DuZ3fnHGyT/Do4DkatMoYcRW4BLfG2EJPs3fjmZ7ChdQB4Rr/k4HbkZl9VfyrXhd3aas/e86++5qNzzETy4MXE7MyZwhlgCJjroY9iUoh/p7lTU4abeoJKvJeSb9PIDOxKLrUY9UVuYhHN4A9Xfg=
+    permissions: public-read
