@@ -11,7 +11,7 @@ that works with Go 1 or newer.
 ### Install
 
 ``` bash
-go get github.com/meatballhat/deppy
+go get github.com/hamfist/deppy
 ```
 
 ### Migrating from godep
