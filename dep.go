@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strings"
 
-	"code.google.com/p/go.tools/go/vcs"
+	"golang.org/x/tools/go/vcs"
 )
 
 // Deps describes what a package needs to be rebuilt reproducibly.
